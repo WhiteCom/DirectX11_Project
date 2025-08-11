@@ -1,0 +1,25 @@
+#include "Timer.h"
+
+Timer::Timer() noexcept
+{
+	last = std::chrono::steady_clock::now();
+}
+
+Timer::~Timer() noexcept
+{
+}
+
+float Timer::Mark() noexcept
+{
+	const std::chrono::steady_clock::time_point old = last;
+	last = std::chrono::steady_clock::now();
+	// Time interval
+	const std::chrono::duration<float> frameTime = last - old;
+
+	return frameTime.count();
+}
+
+float Timer::Peek() noexcept
+{
+	return std::chrono::duration<float>( std::chrono::steady_clock::now() - last ).count();
+}
