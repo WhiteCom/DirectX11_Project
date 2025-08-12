@@ -3,6 +3,7 @@
 #include "CommonHeader.h"
 #include "Timer.h"
 #include <Mouse.h> // from DirectXTK Library
+#include <Keyboard.h> // from DirectXTK Library
 
 class Game
 {
@@ -30,4 +31,5 @@ private:
 	Timer m_Timer;
 
 	std::unique_ptr<DirectX::Mouse> m_mouse;
+	std::unique_ptr<DirectX::Keyboard> m_keyboard;
 };

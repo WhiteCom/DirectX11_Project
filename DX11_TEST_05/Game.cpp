@@ -115,6 +115,8 @@ HRESULT Game::InitGame(HWND hWnd)
 	m_mouse = std::make_unique<DirectX::Mouse>();
 	m_mouse->SetWindow(hWnd);
 
+	m_keyboard = std::make_unique<DirectX::Keyboard>();
+
 	return S_OK;
 }
 
