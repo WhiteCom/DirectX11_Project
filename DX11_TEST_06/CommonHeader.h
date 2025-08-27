@@ -1,0 +1,19 @@
+#pragma once
+
+#include <Windows.h>
+
+#include <wrl/client.h>
+#include <wrl.h>
+
+#include <d3d11.h>
+#include <d3d11_1.h>
+#include <dxgi1_2.h>
+#include <d3dcompiler.h>
+
+#include <exception>
+#include <memory>
+#include <stdexcept>
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <random>
