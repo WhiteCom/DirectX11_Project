@@ -40,6 +40,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_backgroundTex;
 	DirectX::XMFLOAT2 m_backgroundSize;
 
+	// 입력 위치 및 위치 변수
+	std::unique_ptr<DirectX::Keyboard> m_keyBoard;
+
 	Timer m_Timer;
 	float m_UpdateDeltaTime;
 };

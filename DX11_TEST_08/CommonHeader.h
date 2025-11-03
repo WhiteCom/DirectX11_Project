@@ -12,3 +12,7 @@
 #include <memory>
 #include <stdexcept>
 #include <vector>
+
+// DirectXTex_Lib
+#include "Keyboard.h"
+#include "Mouse.h"

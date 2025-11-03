@@ -107,6 +107,8 @@ HRESULT Game::InitGame(HWND hWnd)
 	m_shipPos.x = 10.0f;
 	m_shipPos.y = 10.0f;
 
+	m_keyBoard = std::make_unique<DirectX::Keyboard>();
+
 	//=====================================
 
 	hr = DirectX::CreateWICTextureFromFile(m_d3dDevice.Get(), L"starfield.png", nullptr, m_backgroundTex.ReleaseAndGetAddressOf());
@@ -137,6 +139,8 @@ void Game::DestroyGame()
 
 	m_backgroundStars.reset();
 	m_backgroundTex.Reset();
+
+	m_keyBoard.reset();
 }
 
 void Game::UpdateGame()
@@ -146,6 +150,26 @@ void Game::UpdateGame()
 
 	m_backgroundStars->Update(dt * 500);
 	m_ship->Update(dt);
+
+	
+	// To do...
+	// 키 입력 체크
+	DirectX::Keyboard::State kbState = m_keyBoard->GetState();
+	float moveSpeed = 2.0f * dt;
+
+	// 키 입력으로 이동 WASD, QE
+	if (kbState.A)
+		m_shipPos.x -= moveSpeed;
+	if (kbState.D)
+		m_shipPos.x += moveSpeed;
+	if (kbState.S)
+		m_shipPos.y -= moveSpeed;
+	if (kbState.W)
+		m_shipPos.y += moveSpeed;
+	
+	// 시간에 따라 비행기를 이동시킴
+	// 행렬 합성 순서 = S * R * T
+	// To do...
 }
 
 void Game::ClearBuffer()
