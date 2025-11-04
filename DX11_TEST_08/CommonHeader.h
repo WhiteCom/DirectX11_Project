@@ -16,3 +16,5 @@
 // DirectXTex_Lib
 #include "Keyboard.h"
 #include "Mouse.h"
+#include "DirectXMath.h"
+

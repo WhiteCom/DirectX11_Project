@@ -32,9 +32,15 @@ private:
 
 	// Test Code - 2025.10.23
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture;
-	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
+	UINT m_texture_width;
+	UINT m_texture_height;
+
+	std::unique_ptr<DirectX::SpriteBatch> m_character_spriteBatch;
+	std::unique_ptr<DirectX::SpriteBatch> m_background_spriteBatch;
 	std::unique_ptr<AnimatedTexture> m_ship;
 	DirectX::XMFLOAT2 m_shipPos;
+
+	DirectX::XMMATRIX m_mat_Transform;
 
 	std::unique_ptr<ScrollingBackground> m_backgroundStars;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_backgroundTex;

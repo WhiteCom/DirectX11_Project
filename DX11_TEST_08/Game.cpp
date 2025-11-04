@@ -1,6 +1,8 @@
 #include "Game.h"
 #include <sstream>
 
+#define DEFAULT_VALUE 1.0f
+
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "DirectXTK.lib")
 
@@ -94,8 +96,26 @@ HRESULT Game::InitGame(HWND hWnd)
 		// Error Message
 	}
 
+	// Get Texture Width, Height
+	ID3D11Resource* resource = nullptr;
+	m_texture.Get()->GetResource(&resource);
+	
+	ID3D11Texture2D* texture2D = nullptr;
+	resource->QueryInterface(&texture2D);
+
+	D3D11_TEXTURE2D_DESC texDesc;
+	texture2D->GetDesc(&texDesc);
+
+	m_texture_width = texDesc.Width;
+	m_texture_height = texDesc.Height;
+
+	// Delete Reference
+	resource->Release();
+	texture2D->Release();
+
 	// Create a sprite batch for drawing
-	m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_d3dContext.Get());
+	m_character_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_d3dContext.Get());
+	m_background_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_d3dContext.Get());
 
 	// Create an AnimatedTexture helper class instance and set it to use texture
 	// Which is assumed to have 4 frames of animation with a FPS of 2 seconds
@@ -104,8 +124,10 @@ HRESULT Game::InitGame(HWND hWnd)
 	const int frameSeconds = 20;
 	m_ship->Load(m_texture.Get(), frameCount, frameSeconds);
 
-	m_shipPos.x = 10.0f;
-	m_shipPos.y = 10.0f;
+	m_shipPos.x = 10.f;
+	m_shipPos.y = 10.f;
+
+	m_mat_Transform = DirectX::XMMatrixIdentity();
 
 	m_keyBoard = std::make_unique<DirectX::Keyboard>();
 
@@ -155,21 +177,34 @@ void Game::UpdateGame()
 	// To do...
 	// 키 입력 체크
 	DirectX::Keyboard::State kbState = m_keyBoard->GetState();
-	float moveSpeed = 2.0f * dt;
+	float moveSpeed = 500.0f * dt;
 
-	// 키 입력으로 이동 WASD, QE
+	// 키 입력으로 이동 WASD
 	if (kbState.A)
 		m_shipPos.x -= moveSpeed;
 	if (kbState.D)
 		m_shipPos.x += moveSpeed;
 	if (kbState.S)
-		m_shipPos.y -= moveSpeed;
-	if (kbState.W)
 		m_shipPos.y += moveSpeed;
+	if (kbState.W)
+		m_shipPos.y -= moveSpeed;
+
+	float minX = 0.0f;
+	float maxX = 800.0f - m_texture_width;
+	float minY = 0.0f;
+	float maxY = 600.0f - m_texture_height;
+
+	m_shipPos.x = minX < (m_shipPos.x > maxX ? maxX : m_shipPos.x) ? (m_shipPos.x > maxX ? maxX : m_shipPos.x) : minX; // max( minX, min( m_shipPos.x, maxX ) )
+	m_shipPos.y = minY < (m_shipPos.y > maxY ? maxY : m_shipPos.y) ? (m_shipPos.y > maxY ? maxY : m_shipPos.y) : minY; // max( minY, min( m_shipPos.y, maxY ) )
 	
 	// 시간에 따라 비행기를 이동시킴
 	// 행렬 합성 순서 = S * R * T
 	// To do...
+	DirectX::XMMATRIX mat_Scale = DirectX::XMMatrixScaling(DEFAULT_VALUE, DEFAULT_VALUE, DEFAULT_VALUE);
+	DirectX::XMMATRIX mat_Rotation = DirectX::XMMatrixRotationZ(dt);
+	DirectX::XMMATRIX mat_Translation = DirectX::XMMatrixTranslation(m_shipPos.x, m_shipPos.y, 0.0f);
+
+	m_mat_Transform = mat_Scale * mat_Rotation * mat_Translation;
 }
 
 void Game::ClearBuffer()
@@ -186,13 +221,22 @@ void Game::RenderGame()
 {
 	ClearBuffer();
 
-	// Render the sprite using sprite batch
-	m_spriteBatch->Begin();
+	//
+	// Background Render
+	//
+	m_background_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred);
+	m_backgroundStars->Draw(m_background_spriteBatch.get()); // 배경은 별도 행렬 사용
+	m_background_spriteBatch->End();
 
-	m_backgroundStars->Draw(m_spriteBatch.get());
-	m_ship->Draw(m_spriteBatch.get(), m_shipPos);
+	//
+	// Character Render
+	//
+	m_character_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, nullptr, nullptr, nullptr, nullptr, nullptr, m_mat_Transform);
 
-	m_spriteBatch->End();
+	//m_backgroundStars->Draw(m_character_spriteBatch.get());
+	m_ship->Draw(m_character_spriteBatch.get(), m_shipPos);
+
+	m_character_spriteBatch->End();
 
 	HRESULT hr;
 	hr = m_swapChain->Present(1u, 0u);
